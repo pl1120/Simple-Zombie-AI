@@ -11,7 +11,8 @@ public class ZombieAI : MonoBehaviour
 
     [Header("Movement stats")]
     [SerializeField] private float _gravity = 20f;
-    [SerializeField] private float _movespeed = 5f;
+    [SerializeField] private float _ChaseMoveSpeed = 10f;
+    [SerializeField ]private float WanderSpeed = 5f;
     [SerializeField] float _RotationSpeed;
     [SerializeField] float _TimeToLose = 20f;
 
@@ -29,7 +30,6 @@ public class ZombieAI : MonoBehaviour
     
     private Transform _Player;
     private Transform _currentTarget;
-    CharacterController _controller;
     [HideInInspector]
     public PlayerController _PlayerController;
     private Vector3 _LineOfSight;
@@ -52,7 +52,6 @@ public class ZombieAI : MonoBehaviour
 
     private void Awake()
     {
-        _controller = GetComponent<CharacterController>();
         _PlayerController = GameObject.FindObjectOfType<PlayerController>();
         navmeshagent = GetComponent<NavMeshAgent>();
         FOV = GameObject.FindGameObjectWithTag("Enemy").GetComponent<FieldOfView>();
@@ -64,6 +63,7 @@ public class ZombieAI : MonoBehaviour
         IsMoving = false;
         _enemyState = EnemyState.idle;
         _Player = GameObject.FindGameObjectWithTag("Player").transform;
+        navmeshagent.speed = WanderSpeed;
         if (_Player == null)
         {
             Debug.LogError("No player found");
@@ -113,7 +113,8 @@ public class ZombieAI : MonoBehaviour
                 }
             }
             if (FOV.CanSeePlayer == true)
-            { 
+            {
+                navmeshagent.speed = _ChaseMoveSpeed;
                 _enemyState = EnemyState.chase;
             }
             else if (FOV.CanSeePlayer == false && _enemyState == EnemyState.chase)
@@ -122,6 +123,7 @@ public class ZombieAI : MonoBehaviour
                 if (FOV.CanSeePlayer == false)
                 {
                     _enemyState = EnemyState.idle;
+                    navmeshagent.speed = WanderSpeed;
                 }
             }
             if (IsMoving == false)
